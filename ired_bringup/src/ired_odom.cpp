@@ -15,6 +15,7 @@ bool IREDODOM::init(){
     nh_priv_.param("joint_states_frame", joint_states_.header.frame_id, std::string("base_footprint"));
     nh_priv_.param("odom_frame", odom_.header.frame_id, std::string("odom"));
     nh_priv_.param("odom_tf_publish", odom_tf_publish_, false);
+    nh_priv_.param("odom_topic", odom_topic_, std::string("odom"));
     nh_priv_.param("wheel_left_joint_name", joint_states_name_[LEFT],  std::string("wheel_left_joint"));
     nh_priv_.param("wheel_right_joint_name", joint_states_name_[RIGHT],  std::string("wheel_right_joint"));
 
@@ -37,7 +38,9 @@ bool IREDODOM::init(){
 
     // Initialize publishers
     joint_states_pub_   = nh_.advertise<sensor_msgs::JointState>("/joint_states", 100);
-    odom_pub_           = nh_.advertise<nav_msgs::Odometry>("/odom/encoder", 100);
+    odom_pub_           = nh_.advertise<nav_msgs::Odometry>(odom_topic_, 100);
+    ired_speed_pub_     = nh_.advertise<geometry_msgs::Twist>("/ired/speed", 100);
+    ROS_INFO("ROS publisher on /ired/speed [geometry_msgs/Twist]");
     ROS_INFO("ROS publisher on /joint_states [sensor_msgs/JointState]");
     ROS_INFO("ROS publisher on /odom/encoder [nav_msgs/Odometry]");
 
@@ -148,6 +151,15 @@ bool IREDODOM::updateOdometry(ros::Duration diff_time){
     return true;
 }
 
+void IREDODOM::updateRobotSpeed(void){
+    ired_speed_.linear.x = (double)((wheel_speed_cmd_[LEFT] + wheel_speed_cmd_[RIGHT]) / 2);
+    ired_speed_.linear.y = 0.0;
+    ired_speed_.linear.z = 0.0;
+    ired_speed_.angular.x = 0.0;
+    ired_speed_.angular.y = 0.0;
+    ired_speed_.angular.z = (double)((wheel_speed_cmd_[RIGHT] - wheel_speed_cmd_[LEFT]) / WHEEL_SEPERATION);
+}
+
 void IREDODOM::updateJoint(void){
     joint_states_.position[LEFT]    = last_position_[LEFT];
     joint_states_.position[RIGHT]   = last_position_[RIGHT];
@@ -174,6 +186,9 @@ bool IREDODOM::update(){
         wheel_speed_cmd_[LEFT]  = 0.0;
         wheel_speed_cmd_[RIGHT] = 0.0;
     }
+
+    updateRobotSpeed();
+    ired_speed_pub_.publish(ired_speed_);
 
     updateOdometry(step_time);
     odom_.header.stamp = time_now;

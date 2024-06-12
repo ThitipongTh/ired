@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+
+<launch>
+    <arg name="scan_topic"  default="/scan"/>
+    <arg name="odom_topic"  default="/odom"/>
+    <arg name="vel_topic"   default="/cmd_vel"/>
+    
+    <node pkg="laser_scan_matcher" type="laser_scan_matcher_node" name="laser_scan_matcher_node" output="screen">
+
+        <remap from="scan"  to="$(arg scan_topic)"/>
+        <remap from="odom"  to="$(arg odom_topic)"/>
+        <remap from="vel"   to="$(arg vel_topic)"/>
+
+        <param name="fixed_frame"                   type="string"   value="odom"/>
+        <param name="base_frame"                    type="string"   value="base_footprint"/>
+
+        <param name="use_imu"                       type="bool"     value="false"/>
+        <param name="use_odom"                      type="bool"     value="true"/>
+        <param name="use_vel"                       type="bool"     value="true"/>
+
+        <param name="use_cloud_input"               type="bool"     value="false"/>
+        <param name="cloud_range_min"               type="double"   value="0.5"/>
+        <param name="cloud_range_max"               type="double"   value="50.0"/>
+
+        <param name="kf_dist_linear"                type="double"   value="0.04"/>
+        <param name="kf_dist_angular"               type="double"   value="0.2"/>
+
+        <param name="publish_tf"                    type="bool"     value="true"/>
+        <param name="publish_pose"                  type="bool"     value="true"/>
+        <param name="publish_pose_stamped"          type="bool"     value="false"/>
+
+        <param name="max_iterations"                type="int"      value="10"/>
+        <param name="max_correspondence_dist"       type="double"   value="0.3"/>
+        <param name="max_angular_correction_deg"    type="double"   value="80"/>
+        <param name="max_linear_correction"         type="double"   value="0.30"/>
+        <param name="epsilon_xy"                    type="double"   value="0.000001"/>
+        <param name="epsilon_theta"                 type="double"   value="0.000001"/>
+        <param name="outliers_maxPerc"              type="double"   value="0.90"/>
+
+        <param name="sigma"                         type="double"   value="0.010"/>
+        <param name="use_corr_tricks"               type="int"      value="1"/>
+        <param name="restart"                       type="double"   value="0"/>
+        <param name="restart_threshold_mean_error"  type="double"   value="0.01"/>
+        <param name="restart_dt"                    type="double"   value="1.0"/>
+        <param name="restart_dtheta"                type="double"   value="0.1"/>
+        <param name="clustering_threshold"          type="double"   value="0.25"/>
+
+        <param name="orientation_neighbourhood"     type="int"      value="10"/>
+        <param name="use_point_to_line_distance"    type="int"      value="1"/>
+        <param name="do_alpha_test"                 type="int"      value="0"/>
+        <param name="do_alpha_test_thresholdDeg"    type="double"   value="20.0"/>
+        <param name="outliers_adaptive_order"       type="double"   value="0.7"/>
+        <param name="outliers_adaptive_mul"         type="double"   value="2.0"/>
+
+        <param name="do_visibility_test"            type="int"      value="0"/>
+        <param name="outliers_remove_doubles"       type="int"      value="1"/>
+        <param name="do_compute_covariance"         type="int"      value="0"/>
+        <param name="debug_verify_trick"            type="int"      value="0"/>
+        <param name="use_ml_weights"                type="int"      value="0"/>
+        <param name="use_sigma_weights"             type="int"      value="0"/>
+
+    </node>
+
+</launch>

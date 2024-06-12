@@ -1,20 +1,22 @@
 <?xml version="1.0"?>
 <launch>
+    <!-- Robot URDF -->
     <arg name="urdf_file" default="$(find xacro)/xacro --inorder '$(find ired_bringup)/urdf/robot.urdf.xacro'"/>
     <param name="robot_description" command="$(arg urdf_file)" />
-
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
         <param name="publish_frequency" type="double" value="50.0" />
         <param name="tf_prefix" value=""/>
     </node>
 
+    <!-- odometry -->
     <node name="ired_odom_node" pkg="ired_bringup" type="ired_odom_node"  output="screen">
-        <param name="base_frame" value="base_footprint"/>
-        <param name="joint_states_frame" value="base_footprint"/>
-        <param name="odom_frame" value="odom"/>
-        <param name="odom_tf_publish" value="true"/>
-        <param name="wheel_left_joint_name" value="wheel_left_joint"/>
-        <param name="wheel_right_joint_name" value="wheel_right_joint"/>
+        <param name="base_frame"                value="base_footprint"/>
+        <param name="joint_states_frame"        value="base_footprint"/>
+        <param name="odom_frame"                value="odom"/>
+        <param name="odom_tf_publish"           value="false"/>
+        <param name="odom_topic"               value="/odom/encoder"/>
+        <param name="wheel_left_joint_name"     value="wheel_left_joint"/>
+        <param name="wheel_right_joint_name"    value="wheel_right_joint"/>
     </node>
 
     <!-- LiDAR -->
@@ -32,5 +34,12 @@
         <param name="port" value="$(arg control_port)"/>
         <param name="baud" value="$(arg control_baud)"/>
     </node>
+
+    <!-- laser scan matcher -->
+    <include file="$(find ired_bringup)/launch/laser_scan_matcher.launch">
+        <arg name="scan_topic"  value="/scan"/>
+        <arg name="odom_topic"  value="/odom/encoder"/>
+        <arg name="vel_topic"   value="/cmd_vel"/>
+    </include>
 
 </launch>

@@ -5,6 +5,7 @@
 
 #include <ros/ros.h>
 #include <ros/time.h>
+#include <geometry_msgs/Twist.h>
 #include <ired_msgs/IMU.h>
 #include <ired_msgs/Motor.h>
 #include <nav_msgs/Odometry.h>
@@ -13,14 +14,17 @@
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
 
-#define ROLL    0
-#define PITCH   1
-#define YAW     2
-#define WHEEL_RADIUS    0.034
-#define LEFT            0
-#define RIGHT           1
-#define DEG2RAD(x)      (x * 0.01745329252) // PI/180
-#define RPM2MPS(x)      (x * 0.003560471674) // V = (2*PI*r)/60 * N
+#define ROLL                0
+#define PITCH               1
+#define YAW                 2
+#define LEFT                0
+#define RIGHT               1
+#define WHEEL_RADIUS        0.034
+#define WHEEL_SEPERATION    0.199f
+#define DEG2RAD(x)          (x * 0.01745329252) // PI/180
+#define RAD2DEG(x)          (x * 57.2957795131) // 180/PI
+#define RPM2MPS(x)          (x * 0.00356047167) // V = (2*PI*r)/60 * N
+#define MPS2RPM(x)          (x * 280.861664280) // N = 60/(2*PI*r) * V
 
 
 class IREDODOM{
@@ -42,13 +46,14 @@ class IREDODOM{
         // ROS Publishers
         ros::Publisher joint_states_pub_;
         ros::Publisher odom_pub_;
+        ros::Publisher ired_speed_pub_;
 
         // ROS Subscribers
         ros::Subscriber motor_sub_;
         ros::Subscriber imu_sub_;
-        ros::Subscriber reset_odom_;
 
         // ROS Variables
+        geometry_msgs::Twist ired_speed_;
         sensor_msgs::JointState joint_states_;
         nav_msgs::Odometry odom_;
         tf::TransformBroadcaster tf_broadcaster_;
@@ -58,6 +63,7 @@ class IREDODOM{
         bool odom_tf_publish_ = false;
 
         std::string joint_states_name_[2];
+        std::string odom_topic_;
         double wheel_speed_cmd_[2];
         double angular_[3] = {0.0, 0.0, 0.0};
         double last_position_[2];
@@ -67,6 +73,7 @@ class IREDODOM{
         void fetchMotorCallback(const ired_msgs::MotorConstPtr msg_);
         void fetchAngularCallback(const ired_msgs::IMUConstPtr msg_);
         void commandResetCallback(const std_msgs::EmptyConstPtr reset_odom);
+        void updateRobotSpeed(void);
         void updateJoint(void);
         bool updateOdometry(ros::Duration diff_time);
         void updateTF(geometry_msgs::TransformStamped& odom_tf);
