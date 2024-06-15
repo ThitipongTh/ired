@@ -119,8 +119,10 @@ bool IREDODOM::updateOdometry(ros::Duration diff_time){
     if(isnan(wheel_r))  wheel_r = 0.0;
 
     delta_s     = WHEEL_RADIUS * (wheel_r + wheel_l) / 2.0;
-    theta       = DEG2RAD(angular_[YAW]);
-    delta_theta = theta - last_theta;
+    // theta       = DEG2RAD(angular_[YAW]);
+    // delta_theta = theta - last_theta;
+    delta_s     = WHEEL_RADIUS * (wheel_r + wheel_l) / 2.0;
+    delta_theta = WHEEL_RADIUS * (wheel_r - wheel_l) / WHEEL_SEPERATION;
     
     // compute odometric pose
     odom_pose_[0] += delta_s * cos(odom_pose_[2] + (delta_theta / 2.0));
